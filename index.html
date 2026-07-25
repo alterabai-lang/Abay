@@ -1,289 +1,767 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Streaming</title>
+  <title>Dark Video Mini App</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Inter',sans-serif;
-}
+  <style>
+    :root {
+      --bg: #0d0f12;
+      --card: #15181d;
+      --card-soft: #1b1f25;
+      --border: #252a31;
+      --text: #f3f4f6;
+      --muted: #8d949e;
+      --accent: #8b7cff;
+      --accent-soft: #292445;
+      --danger: #272b32;
+    }
 
-body{
-background:#0D1117;
-color:#fff;
-padding:18px;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-.container{
-max-width:500px;
-margin:auto;
-}
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-.search-box{
-background:#161B22;
-border:1px solid #30363D;
-border-radius:16px;
-display:flex;
-align-items:center;
-padding:14px;
-margin-bottom:16px;
-}
+    button,
+    input {
+      font: inherit;
+    }
 
-.search-box input{
-background:none;
-border:none;
-outline:none;
-color:white;
-width:100%;
-font-size:15px;
-margin-left:10px;
-}
+    .app {
+      max-width: 520px;
+      margin: auto;
+      min-height: 100vh;
+      padding: 18px;
+    }
 
-.toggle{
-display:flex;
-gap:10px;
-margin-bottom:20px;
-}
+    /* HEADER */
 
-.toggle button{
-flex:1;
-border:none;
-background:#161B22;
-color:#8B949E;
-padding:13px;
-border-radius:14px;
-cursor:pointer;
-font-size:14px;
-transition:.3s;
-}
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
 
-.toggle button.active{
-background:#7C5CFF;
-color:white;
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-}
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+      font-size: 18px;
+    }
 
-.card{
-background:#161B22;
-border-radius:18px;
-overflow:hidden;
-transition:.3s;
-cursor:pointer;
-}
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+    }
 
-.card:hover{
-transform:scale(1.03);
-}
+    .brand p {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
 
-.poster{
-position:relative;
-}
+    /* SEARCH */
 
-.poster img{
-width:100%;
-aspect-ratio:2/3;
-object-fit:cover;
-display:block;
-}
+    .search-box {
+      position: relative;
+      margin-bottom: 18px;
+    }
 
-.play{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-width:58px;
-height:58px;
-border-radius:50%;
-background:rgba(0,0,0,.45);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:22px;
-backdrop-filter:blur(6px);
-}
+    .search-box input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: 0.2s;
+    }
 
-.info{
-padding:12px;
-}
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
 
-.title{
-font-weight:600;
-font-size:15px;
-}
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 13px;
+      color: var(--muted);
+    }
 
-.sub{
-font-size:13px;
-color:#8B949E;
-margin-top:5px;
-}
+    /* FILTER */
 
-.list{
-display:none;
-flex-direction:column;
-gap:15px;
-}
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
 
-.list .card{
-display:flex;
-}
+    .toolbar h2 {
+      font-size: 16px;
+    }
 
-.list img{
-width:110px;
-height:160px;
-object-fit:cover;
-}
+    .view-buttons {
+      display: flex;
+      gap: 6px;
+    }
 
-.list .info{
-display:flex;
-flex-direction:column;
-justify-content:center;
-}
+    .view-buttons button {
+      width: 36px;
+      height: 34px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      border-radius: 10px;
+      cursor: pointer;
+    }
 
-</style>
+    .view-buttons button.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* GRID */
+
+    .video-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .video-container.list {
+      grid-template-columns: 1fr;
+    }
+
+    .video-card {
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .video-card:hover {
+      transform: translateY(-2px);
+      border-color: #3a404b;
+    }
+
+    .thumbnail {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      background: #222;
+    }
+
+    .thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .play-button {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+    }
+
+    .video-info {
+      padding: 12px;
+    }
+
+    .video-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .video-description {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* LIST MODE */
+
+    .video-container.list .video-card {
+      display: flex;
+      align-items: center;
+    }
+
+    .video-container.list .thumbnail {
+      width: 130px;
+      min-width: 130px;
+      aspect-ratio: 16 / 10;
+    }
+
+    .video-container.list .video-info {
+      padding: 12px;
+    }
+
+    /* DETAIL PAGE */
+
+    .detail-page {
+      display: none;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .detail-image {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 18px;
+      margin-bottom: 20px;
+    }
+
+    .detail-title {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .detail-description {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .action-button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .watch-button {
+      background: var(--accent);
+      color: white;
+    }
+
+    .watch-button:hover {
+      opacity: 0.9;
+    }
+
+    .share-button {
+      background: var(--card-soft);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--muted);
+      display: none;
+    }
+
+    @media (max-width: 380px) {
+      .video-container {
+        gap: 10px;
+      }
+
+      .video-info {
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <main class="app">
 
-<div class="search-box">
-🔍
-<input type="text" id="search" placeholder="Cari film...">
-</div>
+    <!-- HOME PAGE -->
+    <section id="homePage">
 
-<div class="toggle">
-<button class="active" id="gridBtn">▦ Grid</button>
-<button id="listBtn">☰ List</button>
-</div>
+      <header class="header">
+        <div class="brand">
+          <div class="brand-icon">▶</div>
 
-<div class="grid" id="gridView">
+          <div>
+            <h1>Video Room</h1>
+            <p>Explore your favorite videos</p>
+          </div>
+        </div>
+      </header>
 
-<div class="card">
-<div class="poster">
-<img src="https://picsum.photos/300/450?1">
-<div class="play">▶</div>
-</div>
-<div class="info">
-<div class="title">Movie One</div>
-<div class="sub">Episode 12</div>
-</div>
-</div>
+      <!-- SEARCH -->
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
 
-<div class="card">
-<div class="poster">
-<img src="https://picsum.photos/300/450?2">
-<div class="play">▶</div>
-</div>
-<div class="info">
-<div class="title">Movie Two</div>
-<div class="sub">Episode 8</div>
-</div>
-</div>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Cari video..."
+        />
+      </div>
 
-<div class="card">
-<div class="poster">
-<img src="https://picsum.photos/300/450?3">
-<div class="play">▶</div>
-</div>
-<div class="info">
-<div class="title">Movie Three</div>
-<div class="sub">Episode 6</div>
-</div>
-</div>
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <h2>Explore</h2>
 
-<div class="card">
-<div class="poster">
-<img src="https://picsum.photos/300/450?4">
-<div class="play">▶</div>
-</div>
-<div class="info">
-<div class="title">Movie Four</div>
-<div class="sub">Episode 3</div>
-</div>
-</div>
+        <div class="view-buttons">
+          <button id="gridButton" class="active">▦</button>
+          <button id="listButton">☷</button>
+        </div>
+      </div>
 
-</div>
+      <!-- VIDEO LIST -->
+      <div id="videoContainer" class="video-container"></div>
 
-<div class="list" id="listView">
+      <div id="emptyState" class="empty">
+        Video tidak ditemukan.
+      </div>
 
-<div class="card">
-<img src="https://picsum.photos/300/450?1">
-<div class="info">
-<div class="title">Movie One</div>
-<div class="sub">Episode 12</div>
-</div>
-</div>
+    </section>
 
-<div class="card">
-<img src="https://picsum.photos/300/450?2">
-<div class="info">
-<div class="title">Movie Two</div>
-<div class="sub">Episode 8</div>
-</div>
-</div>
 
-<div class="card">
-<img src="https://picsum.photos/300/450?3">
-<div class="info">
-<div class="title">Movie Three</div>
-<div class="sub">Episode 6</div>
-</div>
-</div>
+    <!-- DETAIL PAGE -->
+    <section id="detailPage" class="detail-page">
 
-</div>
+      <div class="back-button" onclick="goBack()">
+        ← Kembali
+      </div>
 
-</div>
+      <img
+        id="detailImage"
+        class="detail-image"
+        src=""
+        alt="Video"
+      />
 
-<script>
+      <h1 id="detailTitle" class="detail-title"></h1>
 
-const gridBtn=document.getElementById("gridBtn");
-const listBtn=document.getElementById("listBtn");
+      <p id="detailDescription" class="detail-description"></p>
 
-const grid=document.getElementById("gridView");
-const list=document.getElementById("listView");
+      <div class="actions">
 
-gridBtn.onclick=()=>{
-grid.style.display="grid";
-list.style.display="none";
-gridBtn.classList.add("active");
-listBtn.classList.remove("active");
-}
+        <button
+          class="action-button watch-button"
+          onclick="watchNow()"
+        >
+          ▶ Tonton Sekarang
+        </button>
 
-listBtn.onclick=()=>{
-grid.style.display="none";
-list.style.display="flex";
-listBtn.classList.add("active");
-gridBtn.classList.remove("active");
-}
+        <button
+          class="action-button share-button"
+          onclick="shareVideo()"
+        >
+          ↗ Bagikan ke Teman
+        </button>
 
-document.getElementById("search").addEventListener("keyup",function(){
+      </div>
 
-let value=this.value.toLowerCase();
+    </section>
 
-document.querySelectorAll(".card").forEach(card=>{
+  </main>
 
-let title=card.innerText.toLowerCase();
 
-card.style.display=title.includes(value)?"":"none";
+  <script>
 
-});
+    /*
+    ========================================
+    DATA VIDEO
+    ========================================
+    */
 
-});
+    const videos = [
 
-</script>
+      {
+        id: 1,
+        title: "Night Drive",
+        description: "Nikmati suasana perjalanan malam dengan visual yang tenang dan cinematic.",
+        image: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=800",
+        video: "https://example.com/video-1.mp4"
+      },
+
+      {
+        id: 2,
+        title: "Ocean Waves",
+        description: "Video dengan suasana laut yang tenang untuk menemani waktu santai.",
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+        video: "https://example.com/video-2.mp4"
+      },
+
+      {
+        id: 3,
+        title: "City Lights",
+        description: "Pemandangan kota di malam hari dengan suasana modern dan elegan.",
+        image: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800",
+        video: "https://example.com/video-3.mp4"
+      },
+
+      {
+        id: 4,
+        title: "Mountain View",
+        description: "Pemandangan pegunungan yang indah dan menenangkan.",
+        image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+        video: "https://example.com/video-4.mp4"
+      }
+
+    ];
+
+
+    let selectedVideo = null;
+
+
+    /*
+    ========================================
+    RENDER VIDEO
+    ========================================
+    */
+
+    function renderVideos(data = videos) {
+
+      const container = document.getElementById("videoContainer");
+      const emptyState = document.getElementById("emptyState");
+
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+
+        emptyState.style.display = "block";
+
+        return;
+
+      }
+
+      emptyState.style.display = "none";
+
+
+      data.forEach(video => {
+
+        const card = document.createElement("div");
+
+        card.className = "video-card";
+
+        card.innerHTML = `
+
+          <div class="thumbnail">
+
+            <img
+              src="${video.image}"
+              alt="${video.title}"
+            />
+
+            <div class="play-button">
+              ▶
+            </div>
+
+          </div>
+
+          <div class="video-info">
+
+            <div class="video-title">
+              ${video.title}
+            </div>
+
+            <div class="video-description">
+              ${video.description}
+            </div>
+
+          </div>
+
+        `;
+
+        card.onclick = () => openDetail(video.id);
+
+        container.appendChild(card);
+
+      });
+
+    }
+
+
+    /*
+    ========================================
+    OPEN DETAIL
+    ========================================
+    */
+
+    function openDetail(id) {
+
+      selectedVideo = videos.find(video => video.id === id);
+
+      document.getElementById("homePage").style.display = "none";
+
+      document.getElementById("detailPage").style.display = "block";
+
+      document.getElementById("detailImage").src =
+        selectedVideo.image;
+
+      document.getElementById("detailTitle").textContent =
+        selectedVideo.title;
+
+      document.getElementById("detailDescription").textContent =
+        selectedVideo.description;
+
+    }
+
+
+    /*
+    ========================================
+    BACK TO HOME
+    ========================================
+    */
+
+    function goBack() {
+
+      document.getElementById("detailPage").style.display = "none";
+
+      document.getElementById("homePage").style.display = "block";
+
+    }
+
+
+    /*
+    ========================================
+    SEARCH
+    ========================================
+    */
+
+    document
+      .getElementById("searchInput")
+      .addEventListener("input", function () {
+
+        const keyword = this.value.toLowerCase();
+
+        const filteredVideos = videos.filter(video =>
+
+          video.title.toLowerCase().includes(keyword) ||
+
+          video.description.toLowerCase().includes(keyword)
+
+        );
+
+        renderVideos(filteredVideos);
+
+      });
+
+
+    /*
+    ========================================
+    GRID / LIST VIEW
+    ========================================
+    */
+
+    const videoContainer =
+      document.getElementById("videoContainer");
+
+    const gridButton =
+      document.getElementById("gridButton");
+
+    const listButton =
+      document.getElementById("listButton");
+
+
+    gridButton.onclick = () => {
+
+      videoContainer.classList.remove("list");
+
+      gridButton.classList.add("active");
+
+      listButton.classList.remove("active");
+
+    };
+
+
+    listButton.onclick = () => {
+
+      videoContainer.classList.add("list");
+
+      listButton.classList.add("active");
+
+      gridButton.classList.remove("active");
+
+    };
+
+
+    /*
+    ========================================
+    TONTON SEKARANG
+    ========================================
+    */
+
+    function watchNow() {
+
+      if (!selectedVideo) return;
+
+
+      /*
+      TELEGRAM MINI APP
+
+      Data dikirim ke bot:
+
+      {
+        action: "watch",
+        video_id: 1
+      }
+
+      */
+
+      const data = {
+
+        action: "watch",
+
+        video_id: selectedVideo.id
+
+      };
+
+
+      if (
+        window.Telegram &&
+        window.Telegram.WebApp
+      ) {
+
+        Telegram.WebApp.sendData(
+          JSON.stringify(data)
+        );
+
+        Telegram.WebApp.close();
+
+      } else {
+
+        /*
+        Untuk testing di browser biasa
+        */
+
+        alert(
+          "Video dipilih: " +
+          selectedVideo.title
+        );
+
+      }
+
+    }
+
+
+    /*
+    ========================================
+    BAGIKAN KE TEMAN
+    ========================================
+    */
+
+    function shareVideo() {
+
+      if (!selectedVideo) return;
+
+
+      const shareText =
+        `Lihat video ini: ${selectedVideo.title}`;
+
+
+      if (
+        navigator.share
+      ) {
+
+        navigator.share({
+
+          title: selectedVideo.title,
+
+          text: shareText,
+
+          url: window.location.href
+
+        });
+
+      } else {
+
+        navigator.clipboard.writeText(
+          window.location.href
+        );
+
+        alert(
+          "Link berhasil disalin."
+        );
+
+      }
+
+    }
+
+
+    /*
+    ========================================
+    INITIAL RENDER
+    ========================================
+    */
+
+    renderVideos();
+
+
+    /*
+    ========================================
+    TELEGRAM MINI APP SETUP
+    ========================================
+    */
+
+    if (
+      window.Telegram &&
+      window.Telegram.WebApp
+    ) {
+
+      Telegram.WebApp.ready();
+
+      Telegram.WebApp.expand();
+
+    }
+
+  </script>
 
 </body>
 </html>
